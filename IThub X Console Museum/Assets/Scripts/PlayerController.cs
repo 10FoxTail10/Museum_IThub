@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class PacMove : MonoBehaviour
+public class PlayerController : MonoBehaviour
 {
     [Header("Настройки скорости")]
     [SerializeField] private float moveSpeed = 5f;

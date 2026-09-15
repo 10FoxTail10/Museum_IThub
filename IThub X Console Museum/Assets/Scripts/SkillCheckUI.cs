@@ -5,25 +5,25 @@ using System.Collections;
 public class SkillCheckUI : MonoBehaviour
 {
     [Header("Ссылки")]
-    public GameObject panel;
-    public RectTransform track;
-    public RectTransform targetZone;
-    public RectTransform arrow;
-    public UnityEngine.UI.Text missText;
+    [SerializeField] private GameObject panel;
+    [SerializeField] private RectTransform track;
+    [SerializeField] private RectTransform targetZone;
+    [SerializeField] private RectTransform arrow;
+    [SerializeField] private UnityEngine.UI.Text missText;
 
     [Header("Настройки")]
-    public float speed = 350f;
-    public float margin = 15f;
-    public float arrowYOffset = -30f;
+    [SerializeField] private float speed = 350f;
+    [SerializeField] private float margin = 15f;
+    [SerializeField] private float arrowYOffset = -30f;
 
     [Header("Звуки")]
-    public AudioSource audioSource;
-    public AudioClip startSound;    // Звук начала мини-игры
-    public AudioClip successSound;  // Звук попадания (с задержкой)
-    public AudioClip failSound;     // Звук промаха
+    [SerializeField] private AudioSource audioSource;
+    [SerializeField] private AudioClip startSound;    // Звук начала мини-игры
+    [SerializeField] private AudioClip successSound;  // Звук попадания (с задержкой)
+    [SerializeField] private AudioClip failSound;     // Звук промаха
 
     [Tooltip("Задержка перед звуком победы (в секундах)")]
-    public float successSoundDelay = 0.3f;
+    [SerializeField] private float successSoundDelay = 0.3f;
 
     private float currentX;
     private int direction = 1;

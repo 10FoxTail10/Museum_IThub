@@ -5,27 +5,29 @@ using UnityEngine;
 
 public class BreakdownManager : MonoBehaviour
 {
-    [Header("Настройки эскалации")]
-    public int maxSimultaneousBreakdowns = 5;
-    public float spawnInterval = 15f;
-    public float startDelay = 3f;
+    [Header("Настройки сложности")]
+    [SerializeField] private float startDelay = 3f;
+    [SerializeField] private float spawnInterval = 15f;
+    [SerializeField] private GameObject gameOverPanel;
 
-    private List<BreakdownPoint> points = new List<BreakdownPoint>();
-    private Coroutine spawnCoroutine;
+
+    private int maxNumBreakdowns;
+    private int brokenCount;
+    private List<BreakdownPoint> _points = new List<BreakdownPoint>();
+    private Coroutine _spawnCoroutine;
 
     void Start()
     {
-        points.AddRange(FindObjectsOfType<BreakdownPoint>());
+        _points.AddRange(FindObjectsOfType<BreakdownPoint>());
 
-        if (points.Count == 0)
+        if (_points.Count == 0)
         {
             Debug.LogWarning("BreakdownManager: на сцене нет ни одной BreakdownPoint!");
             return;
         }
 
-        maxSimultaneousBreakdowns = Mathf.Min(maxSimultaneousBreakdowns, points.Count);
-
-        spawnCoroutine = StartCoroutine(SpawnBreakdownsRoutine());
+        maxNumBreakdowns = Mathf.Max(maxNumBreakdowns, _points.Count);
+        _spawnCoroutine = StartCoroutine(SpawnBreakdownsRoutine());
     }
 
     private IEnumerator SpawnBreakdownsRoutine()
@@ -34,17 +36,18 @@ public class BreakdownManager : MonoBehaviour
 
         while (true)
         {
-            int brokenCount = points.Count(p => p.IsBroken);
+            brokenCount = _points.Count(point => point.IsBroken);
 
-            if (brokenCount < maxSimultaneousBreakdowns)
+            if (brokenCount < maxNumBreakdowns)
             {
-                var availablePoints = points.Where(p => !p.IsBroken).ToList();
+                var availablePoints = _points.Where(point => !point.IsBroken).ToList();
                 
                 if (availablePoints.Count > 0)
                 {
                     BreakdownPoint pointToBreak = availablePoints[Random.Range(0, availablePoints.Count)];
                     pointToBreak.Break();
-                    Debug.Log($"Новая поломка! Всего сломано: {brokenCount + 1}/{maxSimultaneousBreakdowns}");
+                    Debug.Log($"Новая поломка! Всего сломано: {brokenCount + 1}/{maxNumBreakdowns}");
+                    GameOver();
                 }
             }
 
@@ -54,7 +57,18 @@ public class BreakdownManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        if (spawnCoroutine != null)
-            StopCoroutine(spawnCoroutine);
+        if (_spawnCoroutine != null)
+        {
+            StopCoroutine(_spawnCoroutine);
+        }
+    }
+
+    private void GameOver()
+    {
+        if (brokenCount >= 5)
+        {
+            gameOverPanel.SetActive(true);
+            Debug.Log("Ошибок слишком много(");
+        }
     }
 }
