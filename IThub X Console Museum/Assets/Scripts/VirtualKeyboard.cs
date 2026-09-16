@@ -41,9 +41,9 @@ public class VirtualKeyboard : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
             MoveSelection(-1);
         else if (Input.GetKeyDown(KeyCode.UpArrow))
-            MoveSelection(-9); // Переход на строку выше (сетка 3x9)
+            MoveSelection(-9);
         else if (Input.GetKeyDown(KeyCode.DownArrow))
-            MoveSelection(9);  // Переход на строку ниже
+            MoveSelection(9);
 
         // === ВВОД С ФИЗИЧЕСКОЙ КЛАВИАТУРЫ (быстрый способ) ===
         for (KeyCode key = KeyCode.A; key <= KeyCode.Z; key++)

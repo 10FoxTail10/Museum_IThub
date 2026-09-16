@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
+using TMPro;
 
 public class SkillCheckManager : MonoBehaviour
 {
     public static SkillCheckManager Instance;
 
     public int score = 0;
-    public UnityEngine.UI.Text scoreText;
+    public TMP_Text scoreText;
 
     [Header("UI Скиллчека")]
     public GameObject skillCheckPanel;

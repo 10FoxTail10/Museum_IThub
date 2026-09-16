@@ -6,75 +6,77 @@ public class StartPanelManager : MonoBehaviour
     public static StartPanelManager Instance;
 
     [Header("UI")]
-    public GameObject startPanel;
-    public Button playButton;
+    [SerializeField] private GameObject startPanel;
+    [SerializeField] private Button playButton;
+    [SerializeField] private Button exitButton;
+    [SerializeField] private Slider volumeSlider;
 
-    [Header("Звук клика")]
-    public AudioSource clickAudioSource;
-    public AudioClip clickSound;
+    [Header("Звук нажатия")]
+    [Tooltip("Для мышки. Больше нигде не используется!")]
+    [SerializeField] private AudioSource clickAudioSource;
+    [SerializeField] private AudioClip clickSound;
 
     [Header("Фоновая музыка")]
-    public AudioSource musicAudioSource;
-    public AudioClip backgroundMusic;
-    
-    [Tooltip("Громкость музыки (0 - 1)")]
-    [Range(0f, 1f)]
-    public float musicVolume = 0.5f;
+    [SerializeField] private AudioSource musicAudioSource;
+    [SerializeField] private AudioClip backgroundMusic;
 
-    private bool musicStarted = false; // Чтобы не запускать музыку дважды
+    private bool _isMusicStarted = false;
+    private float _musicVolume = 0.5f;
 
     private void Awake()
     {
-        if (Instance == null) 
+        if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // Музыка не прерывается при смене сцен
+            DontDestroyOnLoad(gameObject);
         }
-        else 
-        { 
-            Destroy(gameObject); 
-            return; 
+        else
+        {
+            Destroy(gameObject);
+            return;
         }
     }
 
     private void Start()
     {
-        if (playButton != null)
-            playButton.onClick.AddListener(OnPlayClicked);
-        
-        if (startPanel != null)
-        {
-            startPanel.SetActive(true);
-            Time.timeScale = 0f;
-        }
-        
-        // Настраиваем AudioSource для музыки
-        if (musicAudioSource != null)
-        {
-            musicAudioSource.loop = true;           // Включаем цикл
-            musicAudioSource.playOnAwake = false;   // Запускаем вручную
-            musicAudioSource.volume = musicVolume;
-        }
+        _musicVolume = PlayerPrefs.GetFloat("Volume", 1f);
+        volumeSlider.value = _musicVolume;
+        startPanel.SetActive(true);
+        Time.timeScale = 0f;
+
+        playButton.onClick.AddListener(OnPlayClicked);
+        exitButton.onClick.AddListener(Exit);
+
+        musicAudioSource.loop = true;
+        musicAudioSource.playOnAwake = false;
+        musicAudioSource.volume = volumeSlider.value;
+
+        volumeSlider.onValueChanged.AddListener(SetMusicVolume);
     }
 
     public void OnPlayClicked()
     {
-        // 1. Звук клика (сразу)
         PlayClickSound();
 
-        // 2. Запускаем фоновую музыку (только один раз за сессию)
-        if (!musicStarted)
+        if (!_isMusicStarted)
         {
             PlayBackgroundMusic();
-            musicStarted = true;
+            _isMusicStarted = true;
         }
 
-        // 3. Закрываем панель и запускаем игру
         if (startPanel != null)
             startPanel.SetActive(false);
         Time.timeScale = 1f;
-        
-        Debug.Log("🎮 Игра началась! Музыка играет.");
+    }
+
+    public void Exit()
+    {
+        PlayClickSound();
+        Application.Quit();
+
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#endif
     }
 
     private void PlayClickSound()
@@ -93,29 +95,25 @@ public class StartPanelManager : MonoBehaviour
             {
                 musicAudioSource.clip = backgroundMusic;
                 musicAudioSource.Play();
-                Debug.Log("🎵 Фоновая музыка запущена в цикле");
             }
-        }
-        else
-        {
-            Debug.LogWarning("Не назначен musicAudioSource или backgroundMusic!");
         }
     }
 
-    // Методы для управления музыкой из других скриптов
     public void StopMusic()
     {
         if (musicAudioSource != null && musicAudioSource.isPlaying)
         {
             musicAudioSource.Stop();
-            musicStarted = false;
+            _isMusicStarted = false;
         }
     }
 
-    public void SetMusicVolume(float volume)
+    public void SetMusicVolume(float value)
     {
-        musicVolume = Mathf.Clamp01(volume);
-        if (musicAudioSource != null)
-            musicAudioSource.volume = musicVolume;
+        _musicVolume = value;
+        musicAudioSource.volume = _musicVolume;
+
+        PlayerPrefs.SetFloat("Volume", _musicVolume);
+        PlayerPrefs.Save();
     }
 }
